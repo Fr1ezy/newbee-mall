@@ -3,19 +3,41 @@ type: docker
 name: default  
   
 steps:  
+  # 恢复缓存，减少依赖重新下载
+  - name: restore-cache  
+    image: plugins/cache  
+    settings:  
+      restore: true  
+      mount:  
+        - target: /root/.m2/repository  # Maven 本地仓库路径
+  
+  # 编译项目
   - name: build  
     image: maven:3.8.1-jdk-11  
+    environment:
+      MAVEN_OPTS: "-Dmaven.repo.local=/root/.m2/repository -DskipTests=true"
     commands:  
-      - mvn clean install -B  
+      - mvn clean install -B -DskipTests  # 使用 -DskipTests 跳过测试以加快构建速度
   
+  # 测试项目
   - name: test  
     image: maven:3.8.1-jdk-11  
+    environment:
+      MAVEN_OPTS: "-Dmaven.repo.local=/root/.m2/repository"
     commands:  
-      - mvn test  
+      - mvn test -B  
+  
+  # 重新缓存构建后的依赖
+  - name: rebuild-cache  
+    image: plugins/cache  
+    settings:  
+      rebuild: true  
+      mount:  
+        - target: /root/.m2/repository  # Maven 本地仓库路径
   
 trigger:  
   branch:  
     - main  
     - master  
   event:  
-    - push
+    - push  
