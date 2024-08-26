@@ -27,7 +27,7 @@ steps:
       MAVEN_OPTS: "-Dmaven.repo.local=/root/.m2/repository"
     commands:
       - ls -l target  # 列出 target 目录中的所有文件，以验证 JAR 文件的路径
-      - java -jar target/demo-1.0-SNAPSHOT.jar &
+      - java -jar target/newbee-mall-1.0.0-SNAPSHOT.jar &
       - sleep 10  # 等待服务器启动
 
   # 运行 Nikto 漏洞扫描
