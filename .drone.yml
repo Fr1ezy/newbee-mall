@@ -1,43 +1,52 @@
-kind: pipeline  
-type: docker  
-name: default  
-  
-steps:  
+kind: pipeline
+type: docker
+name: default
+
+steps:
   # 恢复缓存，减少依赖重新下载
-  - name: restore-cache  
-    image: plugins/cache  
-    settings:  
-      restore: true  
-      mount:  
-        - target: /root/.m2/repository  # Maven 本地仓库路径
-  
+  - name: restore-cache
+    image: plugins/cache
+    settings:
+      restore: true
+      mount:
+        - target: /root/.m2/repository
+
   # 编译项目
-  - name: build  
-    image: maven:3.8.1-jdk-11  
+  - name: build
+    image: maven:3.8.1-jdk-8
     environment:
       MAVEN_OPTS: "-Dmaven.repo.local=/root/.m2/repository -DskipTests=true"
-    commands:  
-      - mvn clean install -B -DskipTests  # 使用 -DskipTests 跳过测试以加快构建速度
-  
-  # 测试项目
-  - name: test  
-    image: maven:3.8.1-jdk-11  
+    commands:
+      - mvn clean install -B -DskipTests
+      - ls -l target  # 列出 target 目录中的所有文件
+
+  # 启动 Web 服务器
+  - name: start-server
+    image: openjdk:8-jre
     environment:
       MAVEN_OPTS: "-Dmaven.repo.local=/root/.m2/repository"
-    commands:  
-      - mvn test -B  
-  
+    commands:
+      - ls -l target  # 列出 target 目录中的所有文件，以验证 JAR 文件的路径
+      - java -jar target/demo-1.0-SNAPSHOT.jar &
+      - sleep 10  # 等待服务器启动
+
+  # 运行 Nikto 漏洞扫描
+  - name: nikto-scan
+    image: sullo/nikto
+    commands:
+      - nikto -h http://localhost:8080  # 这里的端口应与项目启动的端口一致
+
   # 重新缓存构建后的依赖
-  - name: rebuild-cache  
-    image: plugins/cache  
-    settings:  
-      rebuild: true  
-      mount:  
-        - target: /root/.m2/repository  # Maven 本地仓库路径
-  
-trigger:  
-  branch:  
-    - main  
-    - master  
-  event:  
-    - push  
+  - name: rebuild-cache
+    image: plugins/cache
+    settings:
+      rebuild: true
+      mount:
+        - target: /root/.m2/repository
+
+trigger:
+  branch:
+    - main
+    - master
+  event:
+    - push
