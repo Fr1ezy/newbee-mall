@@ -41,7 +41,7 @@ steps:
   - name: nuclei-scan
     image: projectdiscovery/nuclei:latest
     commands:
-      - nuclei -u https://dtiip.com  # 这里的端口应与项目启动的端口一致
+      - nuclei -u https://www.dtiip.com/  # 这里的端口应与项目启动的端口一致
 
   # 重新缓存构建后的依赖
   - name: rebuild-cache
