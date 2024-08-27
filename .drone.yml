@@ -30,11 +30,11 @@ steps:
       - java -jar target/newbee-mall-1.0.0-SNAPSHOT.jar &
       - sleep 10  # 等待服务器启动
 
-  # 运行 Nikto 漏洞扫描
-  - name: nikto-scan
-    image: securecodebox/nikto:latest
+  # 运行 nuclei 漏洞扫描
+  - name: nuclei-scan
+    image: projectdiscovery/nuclei:latest
     commands:
-      - nikto -h http://localhost:8080  # 这里的端口应与项目启动的端口一致
+      - nuclei -u http://localhost:8080  # 这里的端口应与项目启动的端口一致
 
   # 重新缓存构建后的依赖
   - name: rebuild-cache
