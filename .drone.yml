@@ -29,14 +29,12 @@ steps:
       - ls -l target  # 列出 target 目录中的所有文件，以验证 JAR 文件的路径
       - java -jar target/newbee-mall-1.0.0-SNAPSHOT.jar &
       - sleep 10  # 等待服务器启动
-      - until curl -s http://localhost:8080; do sleep 1; echo "Waiting for server..."; done  # 健康检查
-      - echo "Server is up!"
 
-  # 运行 nuclei 漏洞扫描
-  - name: nuclei-scan
-    image: projectdiscovery/nuclei:latest
+  # 运行 Nikto 漏洞扫描
+  - name: nikto-scan
+    image: securecodebox/nikto:latest
     commands:
-      - nuclei -u http://localhost  # 这里的端口应与项目启动的端口一致
+      - nikto -h http://localhost:8080  # 这里的端口应与项目启动的端口一致
 
   # 重新缓存构建后的依赖
   - name: rebuild-cache
