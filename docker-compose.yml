@@ -1,0 +1,28 @@
+version: '3.7'
+services:
+  mysql-db:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: newbee_mall_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    networks:
+      - my-network
+
+  newbee-mall:
+    image: your-docker-repo/newbee-mall:latest
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/newbee_mall_db
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql-db
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge
