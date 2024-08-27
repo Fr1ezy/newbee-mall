@@ -20,7 +20,6 @@ steps:
       - mvn clean package -DskipTests
       - ls -l target  # 列出 target 目录中的所有文件
       
-
   # 安装 curl 工具
   - name: install-curl
     image: alpine:latest
