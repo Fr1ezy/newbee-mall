@@ -34,7 +34,6 @@ steps:
   - name: nuclei-scan
     image: projectdiscovery/nuclei:latest
     commands:
-      - curl https://www.dtiip.com/
       - nuclei -update-templates  # 下载最新的模板
       - nuclei -t /root/nuclei-templates -validate
       - nuclei -u https://www.dtiip.com/  # 这里的端口应与项目启动的端口一致
