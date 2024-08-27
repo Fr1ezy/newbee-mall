@@ -30,6 +30,12 @@ steps:
       - java -jar target/newbee-mall-1.0.0-SNAPSHOT.jar &
       - sleep 10  # 等待服务器启动
 
+  # 下载 Nuclei 模板
+  - name: download-nuclei-templates
+    image: projectdiscovery/nuclei:latest
+    commands:
+      - nuclei -update-templates  # 下载最新的模板
+
   # 运行 nuclei 漏洞扫描
   - name: nuclei-scan
     image: projectdiscovery/nuclei:latest
