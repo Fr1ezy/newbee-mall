@@ -1,0 +1,69 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  # 恢复缓存，减少依赖重新下载
+  - name: restore-cache
+    image: plugins/cache
+    settings:
+      restore: true
+      mount:
+        - target: /root/.m2/repository
+
+  # 编译项目
+  - name: build
+    image: maven:3.8.1-jdk-8
+    environment:
+      MAVEN_OPTS: "-Dmaven.repo.local=/root/.m2/repository -DskipTests=true"
+    commands:
+      - mvn clean install -B -DskipTests
+      - ls -l target  # 列出 target 目录中的所有文件
+
+  # 启动数据库和 Web 服务器
+  - name: start-services
+    image: docker:20.10
+    commands:
+      - docker network create my-network  # 创建自定义网络
+      - docker run -d --name mysql-db --network my-network \
+          -e MYSQL_ROOT_PASSWORD=rootpassword \
+          -e MYSQL_DATABASE=newbee_mall_db \
+          -e MYSQL_USER=user \
+          -e MYSQL_PASSWORD=password \
+          mysql:latest  # 启动 MySQL 数据库容器
+      - sleep 20  # 等待 MySQL 启动
+      - docker exec -i mysql-db mysql -uuser -ppassword newbee_mall_db < src/main/resources/newbee_mall_schema.sql  # 导入数据库文件
+      - docker run -d --name newbee-mall --network my-network \
+          -e SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/newbee_mall_db \
+          -e SPRING_DATASOURCE_USERNAME=user \
+          -e SPRING_DATASOURCE_PASSWORD=password \
+          your-newbee-mall-image  # 启动 NewBee-Mall 服务
+      - sleep 30  # 等待 NewBee-Mall 启动
+
+  # 健康检查
+  - name: health-check
+    image: curlimages/curl
+    commands:
+      - until curl -s http://localhost:8080; do sleep 5; echo "Waiting for NewBee-Mall server..."; done
+      - echo "NewBee-Mall server is up!"
+
+  # 运行 nuclei 漏洞扫描
+  - name: nuclei-scan
+    image: projectdiscovery/nuclei:latest
+    commands:
+      - nuclei -u http://localhost:8080  # 扫描 NewBee-Mall 服务
+
+  # 重新缓存构建后的依赖
+  - name: rebuild-cache
+    image: plugins/cache
+    settings:
+      rebuild: true
+      mount:
+        - target: /root/.m2/repository
+
+trigger:
+  branch:
+    - main
+    - master
+  event:
+    - push
