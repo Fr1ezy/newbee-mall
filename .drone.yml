@@ -38,6 +38,7 @@ steps:
       - sleep 60  # 等待服务启动
       - docker exec -i mysql-db mysql -uuser -ppassword newbee_mall_db < src/main/resources/newbee_mall_schema.sql  # 导入数据库文件
 
+
  # 启动 NewBee-Mall 服务
   - name: start-server
     image: openjdk:8-jre
