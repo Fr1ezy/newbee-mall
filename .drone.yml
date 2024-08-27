@@ -24,7 +24,7 @@ steps:
   - name: start-mysql
     image: docker:20.10
     commands:
-      - docker run -d --name mysql-db \
+      - docker run -d --name mysql-db 
           -e MYSQL_ROOT_PASSWORD=rootpassword \
           -e MYSQL_DATABASE=newbee_mall_db \
           -e MYSQL_USER=user \
