@@ -26,6 +26,7 @@ steps:
     image: alpine:latest
     commands:
       - apk add --no-cache curl
+      - sleep 10
       
   # 启动 Docker Compose 服务
   - name: start-services
