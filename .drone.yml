@@ -20,15 +20,12 @@ steps:
       - mvn clean package -DskipTests
       - ls -l target  # 列出 target 目录中的所有文件
       
- # 启动 NewBee-Mall 服务
-  - name: start-server
-    image: openjdk:8-jre
-    environment:
-      MAVEN_OPTS: "-Dmaven.repo.local=/root/.m2/repository"
+
+  # 安装 curl 工具
+  - name: install-curl
+    image: alpine:latest
     commands:
-      - ls -l target  # 列出 target 目录中的所有文件，以验证 JAR 文件的路径
-      - java -jar target/newbee-mall-1.0.0-SNAPSHOT.jar &
-      - sleep 20  # 等待服务器启动
+      - apk add --no-cache curl
       
   # 启动 Docker Compose 服务
   - name: start-services
@@ -40,6 +37,16 @@ steps:
       - docker-compose up -d  # 启动服务
       - sleep 60  # 等待服务启动
       - docker exec -i mysql-db mysql -uuser -ppassword newbee_mall_db < src/main/resources/newbee_mall_schema.sql  # 导入数据库文件
+
+ # 启动 NewBee-Mall 服务
+  - name: start-server
+    image: openjdk:8-jre
+    environment:
+      MAVEN_OPTS: "-Dmaven.repo.local=/root/.m2/repository"
+    commands:
+      - ls -l target  # 列出 target 目录中的所有文件，以验证 JAR 文件的路径
+      - java -jar target/newbee-mall-1.0.0-SNAPSHOT.jar &
+      - sleep 20  # 等待服务器启动
 
   # 健康检查
   - name: health-check
