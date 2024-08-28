@@ -48,7 +48,11 @@ steps:
       rebuild: true
       mount:
         - target: /root/.m2/repository
-
+services:
+  - name: docker
+    image: docker:20.10-dind
+    privileged: true
+    
 trigger:
   branch:
     - main
