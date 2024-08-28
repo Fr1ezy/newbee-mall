@@ -32,11 +32,14 @@ steps:
 
   # 运行 nuclei 漏洞扫描
   - name: nuclei-scan
-    image: projectdiscovery/nuclei:latest
+    image: nuclei-scanner
     commands:
-      - nuclei -update-templates  # 下载最新的模板
-      - nuclei -t /root/nuclei-templates -validate
       - nuclei -u https://www.dtiip.com/  # 这里的端口应与项目启动的端口一致
+  # 运行 nikto 漏洞扫描
+  - name: nikto-scan
+    image: nikto-scanner
+    commands:
+      - nikto -h https://www.dtiip.com/  # 这里的端口应与项目启动的端口一致
 
   # 重新缓存构建后的依赖
   - name: rebuild-cache
