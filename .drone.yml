@@ -32,12 +32,12 @@ steps:
 
   # 运行 nuclei 漏洞扫描
   - name: nuclei-scan
-    image: nuclei-scanner
+    image: nuclei-scanner:latest
     commands:
       - nuclei -u https://www.dtiip.com/  # 这里的端口应与项目启动的端口一致
   # 运行 nikto 漏洞扫描
   - name: nikto-scan
-    image: nikto-scanner
+    image: nikto-scanner:latest
     commands:
       - nikto -h https://www.dtiip.com/  # 这里的端口应与项目启动的端口一致
 
